@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typey</title>
+    <style>
+      html {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        padding: 4px 0;
+      }
+      p {
+        background-color: #DDDDDD;
+        font-size: 18px;
+        margin: 8px 12px;
+        padding: 12px;
+      }
+      body > div > input {
+        bottom: 0;
+        box-sizing: border-box;
+        font-size: 16px;
+        height: 48px;
+        padding: 12px;
+        position: fixed;
+        width: 100%;
+      }
+      #fullbg {
+        align-items: center;
+        background-color: white;
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        width: 100vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div id="main">
+      </div>
+      <input id="input" type="text" placeholder="Type!" onkeyup="onkey(event)">
+    </div>
+    <div id="fullbg" onclick="disappear_from_my_face()"><h1>Tap to start!</h1></div>
+  </body>
+  <script src="full_array.js"></script>
+  <script>
+    var first;
+    var text;
+    var timer = 5000;
+    var lastTimer = 1000;
+    var started = false;
+    var score = 0;
+    var tempscore = 0;
+    var word_length = 6;
+    var completed = false;
+    function disappear_from_my_face(){
+      document.getElementById("fullbg").style.display = "none";
+      started = true;
+    }
+    var intervalSet = setInterval(function (){
+      if (started){
+        var index = Math.floor(Math.random() * full_array.length);
+        while (full_array[index].length > word_length){
+          index = Math.floor(Math.random() * full_array.length);
+        }
+        var p = document.createElement("p");
+        p.innerHTML = full_array[index];
+        p.id = full_array[index];
+        document.getElementById("main").appendChild(p);
+        if (!completed){
+          first = document.getElementById("main").children[0];
+          text = first.innerHTML;
+          completed = true;
+        }
+        var shouldSetAnother = false;
+        while (tempscore > 5){
+          shouldSetAnother = true;
+          tempscore = tempscore  - 5;
+          word_length++;
+          if (timer > lastTimer){
+            timer = timer - 250;
+          }
+        }
+        if (shouldSetAnother){
+          setAnotherInterval();
+        }
+      }
+    }, timer);
+    function setAnotherInterval(){
+      clearInterval(intervalSet);
+      intervalSet = setInterval(function (){
+        if (started){
+          var index = Math.floor(Math.random() * full_array.length);
+          while (full_array[index].length > word_length){
+            index = Math.floor(Math.random() * full_array.length);
+          }
+          var p = document.createElement("p");
+          p.innerHTML = full_array[index];
+          p.id = full_array[index];
+          document.getElementById("main").appendChild(p);
+          if (!completed){
+            first = document.getElementById("main").children[0];
+            text = first.innerHTML;
+            completed = true;
+          }
+          var shouldSetAnother = false;
+          while (tempscore > 5){
+            shouldSetAnother = true;
+            tempscore = tempscore  - 5;
+            word_length++;
+            if (timer > lastTimer){
+              timer = timer - 250;
+            }
+          }
+          if (shouldSetAnother){
+            setAnotherInterval();
+          }
+        }
+      }, timer);
+    }
+    function onkey(event){
+      if (event.keyCode == 13){
+        var children = document.getElementById("main").children;
+        for (var a = 0; a < children.length; a++){
+          if (document.getElementById("input").value == text){
+            document.getElementById("main").removeChild(children[a]);
+            document.getElementById("input").value = "";
+            score++;
+            tempscore++;
+            if (document.getElementById("main").children.length == 0){
+              completed = false;
+            } else {
+              first = document.getElementById("main").children[0];
+              text = first.innerHTML;
+            }
+          }
+        }
+      } else {
+        var replace = "";
+        for (var a = 0; a < text.length; a++){
+          if (document.getElementById("input").value.charAt(a) == text.charAt(a)){
+            replace += "<span style='color: #01A000;'>" + text.charAt(a) + "</span>";
+          } else {
+            replace += text.charAt(a);
+          }
+        }
+        first.innerHTML = replace;
+      }
+    }
+  </script>
+</html>
