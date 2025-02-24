@@ -28,15 +28,29 @@
         position: fixed;
         width: 100%;
       }
-      #fullbg {
+      #fullbg, #gameoverbg {
         align-items: center;
         background-color: white;
         display: flex;
+        flex-direction: column;
         height: 100vh;
         justify-content: center;
         position: absolute;
         top: 0;
         width: 100vw;
+      }
+      #gameoverbg {
+        display: none;
+      }
+      #fullbg > h1 {
+        margin-bottom: 64px;
+      }
+      #dropdown {
+        align-self: anchor-center;
+        justify-self: anchor-center;
+        position: absolute;
+        top: 48px;
+        width: 100px;
       }
     </style>
   </head>
@@ -47,24 +61,68 @@
       <input id="input" type="text" placeholder="Type!" onkeyup="onkey(event)">
     </div>
     <div id="fullbg" onclick="disappear_from_my_face()"><h1>Tap to start!</h1></div>
+    <div id="gameoverbg" onclick="redisappear_from_my_face()"><h1>Game over!</h1><p id="score"></p></div>
+    <select id="dropdown">
+      <option>Dictionary</option>
+      <option>Programming (Android)</option>
+      <option>Programming (Java)</option>
+      <option>Programming (C#)</option>
+    </select>
   </body>
-  <script src="full_array.js"></script>
+  <script src="dictionary_array.js"></script>
+  <script src="programming_android_full_array.js"></script>
+  <script src="programming_java_full_array.js"></script>
+  <script src="programming_csharp_full_array.js"></script>
   <script>
+    var full_array;
+    var selectedTopic = "none";
     var first;
     var text;
     var timer = 5000;
-    var lastTimer = 1000;
-    var started = false;
+    var lastTimer = 1500;
     var score = 0;
     var tempscore = 0;
     var word_length = 6;
     var completed = false;
+    var intervalSet;
+    function gameOver(){
+      clearInterval(intervalSet);
+      reappear_on_my_face();
+    }
+    function reappear_on_my_face(){
+      document.getElementById("gameoverbg").style.display = "flex";
+      document.getElementById("score").innerHTML = "Score: " + score;
+      timer = 5000;
+      score = 0;
+      tempscore = 0;
+      word_length = 6;
+      document.getElementById("main").innerHTML = "";
+    }
+    function mega_reappear_on_my_face(){
+      document.getElementById("fullbg").style.display = "flex";
+      document.getElementById("dropdown").style.display = "flex";
+    }
+    function redisappear_from_my_face(){
+      document.getElementById("gameoverbg").style.display = "none";
+      mega_reappear_on_my_face();
+    }
     function disappear_from_my_face(){
       document.getElementById("fullbg").style.display = "none";
-      started = true;
-    }
-    var intervalSet = setInterval(function (){
-      if (started){
+      document.getElementById("dropdown").style.display = "none";
+      selectedTopic = document.getElementById("dropdown").value;
+      if (selectedTopic == "Dictionary"){
+        full_array = dictionary_array;
+      }
+      if (selectedTopic == "Programming (Android)"){
+        full_array = programming_android_array;
+      }
+      if (selectedTopic == "Programming (Java)"){
+        full_array = programming_java_array;
+      }
+      if (selectedTopic == "Programming (C#)"){
+        full_array = programming_csharp_array;
+      }
+      intervalSet = setInterval(function (){
         var index = Math.floor(Math.random() * full_array.length);
         while (full_array[index].length > word_length){
           index = Math.floor(Math.random() * full_array.length);
@@ -90,37 +148,41 @@
         if (shouldSetAnother){
           setAnotherInterval();
         }
-      }
-    }, timer);
+        if (document.getElementById("main").children.length == 11){
+          gameOver();
+        }
+      }, timer);
+    }
     function setAnotherInterval(){
       clearInterval(intervalSet);
       intervalSet = setInterval(function (){
-        if (started){
-          var index = Math.floor(Math.random() * full_array.length);
-          while (full_array[index].length > word_length){
-            index = Math.floor(Math.random() * full_array.length);
+        var index = Math.floor(Math.random() * full_array.length);
+        while (full_array[index].length > word_length){
+          index = Math.floor(Math.random() * full_array.length);
+        }
+        var p = document.createElement("p");
+        p.innerHTML = full_array[index];
+        p.id = full_array[index];
+        document.getElementById("main").appendChild(p);
+        if (!completed){
+          first = document.getElementById("main").children[0];
+          text = first.innerHTML;
+          completed = true;
+        }
+        var shouldSetAnother = false;
+        while (tempscore > 5){
+          shouldSetAnother = true;
+          tempscore = tempscore  - 5;
+          word_length++;
+          if (timer > lastTimer){
+            timer = timer - 250;
           }
-          var p = document.createElement("p");
-          p.innerHTML = full_array[index];
-          p.id = full_array[index];
-          document.getElementById("main").appendChild(p);
-          if (!completed){
-            first = document.getElementById("main").children[0];
-            text = first.innerHTML;
-            completed = true;
-          }
-          var shouldSetAnother = false;
-          while (tempscore > 5){
-            shouldSetAnother = true;
-            tempscore = tempscore  - 5;
-            word_length++;
-            if (timer > lastTimer){
-              timer = timer - 250;
-            }
-          }
-          if (shouldSetAnother){
-            setAnotherInterval();
-          }
+        }
+        if (shouldSetAnother){
+          setAnotherInterval();
+        }
+        if (document.getElementById("main").children.length == 11){
+          gameOver();
         }
       }, timer);
     }
